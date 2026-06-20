@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 18 Jun 2026 pada 09.12
+-- Waktu pembuatan: 20 Jun 2026 pada 08.55
 -- Versi server: 10.1.38-MariaDB
 -- Versi PHP: 7.3.2
 
@@ -30,6 +30,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `pemasukan` (
   `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL DEFAULT '1',
   `tanggal` date NOT NULL,
   `keterangan` varchar(100) NOT NULL,
   `jumlah` decimal(12,2) NOT NULL
@@ -39,9 +40,10 @@ CREATE TABLE `pemasukan` (
 -- Dumping data untuk tabel `pemasukan`
 --
 
-INSERT INTO `pemasukan` (`id`, `tanggal`, `keterangan`, `jumlah`) VALUES
-(1, '2026-06-11', 'Banyak', '2000000000.00'),
-(3, '2026-06-18', 'Gaji Bulan Ini', '200000000.00');
+INSERT INTO `pemasukan` (`id`, `user_id`, `tanggal`, `keterangan`, `jumlah`) VALUES
+(1, 1, '2026-06-11', 'Banyak', '2000000000.00'),
+(3, 1, '2026-06-18', 'Gaji Bulan Ini', '200000000.00'),
+(4, 3, '2026-06-19', 'Gaji', '1000000.00');
 
 -- --------------------------------------------------------
 
@@ -51,10 +53,18 @@ INSERT INTO `pemasukan` (`id`, `tanggal`, `keterangan`, `jumlah`) VALUES
 
 CREATE TABLE `pengeluaran` (
   `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL DEFAULT '1',
   `tanggal` date NOT NULL,
   `keterangan` varchar(100) NOT NULL,
   `jumlah` decimal(12,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data untuk tabel `pengeluaran`
+--
+
+INSERT INTO `pengeluaran` (`id`, `user_id`, `tanggal`, `keterangan`, `jumlah`) VALUES
+(2, 1, '2026-06-30', 'KBM', '1000000000.00');
 
 -- --------------------------------------------------------
 
@@ -65,15 +75,19 @@ CREATE TABLE `pengeluaran` (
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL
+  `nama` varchar(100) NOT NULL DEFAULT '',
+  `password` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data untuk tabel `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`) VALUES
-(1, 'admin', 'admin123');
+INSERT INTO `users` (`id`, `username`, `nama`, `password`, `created_at`) VALUES
+(1, 'admin', 'Administrator', '$2y$10$WAn7SeVFrRyG0afrJ7CTN.fXVfgtACXLLm9B7QBB3JDEkXnapCvs6', '2026-06-19 00:44:58'),
+(3, 'devin', 'Devin', '$2y$10$F2xtOiyn57E6CZtIYPVfj.U7.Wg8ZVp.nx86v1O5U6WHrn9GgABpi', '2026-06-19 01:12:59'),
+(4, 'dimas', 'Dimas', '$2y$10$aIli/9ep4t92JLuAWIGn1OSYibCyCbgHMZKoJZmkEEsysROl6beg2', '2026-06-19 01:19:05');
 
 --
 -- Indexes for dumped tables
@@ -105,19 +119,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `pemasukan`
 --
 ALTER TABLE `pemasukan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengeluaran`
 --
 ALTER TABLE `pengeluaran`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
