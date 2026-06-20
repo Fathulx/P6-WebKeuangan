@@ -1,21 +1,24 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['login'])) {
+    header("Location: ../index.php");
+    exit;
+}
+
 include "../conn.php";
 
 if (isset($_POST['simpan'])) {
 
-    $tanggal = $_POST['tanggal'];
-    $keterangan = $_POST['keterangan'];
-    $jumlah = $_POST['jumlah'];
+    $user_id    = (int) $_SESSION['user_id'];
+    $tanggal    = $_POST['tanggal'];
+    $keterangan = htmlspecialchars(trim($_POST['keterangan']));
+    $jumlah     = (float) $_POST['jumlah'];
 
-    mysqli_query(
-        $conn,
-        "INSERT INTO pemasukan
-        (tanggal,keterangan,jumlah)
-        VALUES
-        ('$tanggal','$keterangan','$jumlah')"
-    );
+    $stmt = mysqli_prepare($conn, "INSERT INTO pemasukan (user_id, tanggal, keterangan, jumlah) VALUES (?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "issd", $user_id, $tanggal, $keterangan, $jumlah);
+    mysqli_stmt_execute($stmt);
 
-    header("Location: pemasukan.php");
+    header("Location: pemasukan.php?success=tambah");
     exit;
 }
-?>

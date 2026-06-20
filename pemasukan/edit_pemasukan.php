@@ -1,24 +1,26 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['login'])) {
+    header("Location: ../index.php");
+    exit;
+}
+
 include "../conn.php";
 
 if (isset($_POST['update'])) {
 
-    $id = $_GET['id'];
+    $user_id    = (int) $_SESSION['user_id'];
+    $id         = (int) $_GET['id'];
+    $tanggal    = $_POST['tanggal'];
+    $keterangan = htmlspecialchars(trim($_POST['keterangan']));
+    $jumlah     = (float) $_POST['jumlah'];
 
-    $tanggal = $_POST['tanggal'];
-    $keterangan = $_POST['keterangan'];
-    $jumlah = $_POST['jumlah'];
+    
+    $stmt = mysqli_prepare($conn, "UPDATE pemasukan SET tanggal = ?, keterangan = ?, jumlah = ? WHERE id = ? AND user_id = ?");
+    mysqli_stmt_bind_param($stmt, "ssdii", $tanggal, $keterangan, $jumlah, $id, $user_id);
+    mysqli_stmt_execute($stmt);
 
-    mysqli_query(
-        $conn,
-        "UPDATE pemasukan SET
-        tanggal='$tanggal',
-        keterangan='$keterangan',
-        jumlah='$jumlah'
-        WHERE id='$id'"
-    );
-
-    header("Location: pemasukan.php");
+    header("Location: pemasukan.php?success=edit");
     exit;
 }
-?>
