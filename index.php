@@ -1,24 +1,38 @@
 <?php
 session_start();
+
+if (isset($_SESSION['login'])) {
+    header("Location: dashboard.php");
+    exit;
+}
+
 include "conn.php";
 
+$error = "";
 
 if (isset($_POST['login'])) {
 
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    // Sanitasi input
+    $username = htmlspecialchars(trim($_POST['username']));
+    $password = trim($_POST['password']);
 
-    $query = mysqli_query(
-        $conn,
-        "SELECT * FROM users
-        WHERE username='$username'
-        AND password='$password'"
-    );
+    // Prepared statement (aman dari SQL Injection)
+    $stmt = mysqli_prepare($conn, "SELECT * FROM users WHERE username = ?");
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $user = mysqli_fetch_assoc($result);
 
-    if (mysqli_num_rows($query) > 0) {
+    if ($user && password_verify($password, $user['password'])) {
+
+        // Regenerate session ID untuk keamanan
+        session_regenerate_id(true);
 
         $_SESSION['login'] = true;
-        $_SESSION['username'] = $username;
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['nama'] = $user['nama'];
+        $_SESSION['is_admin'] = ($user['username'] === 'admin');
 
         header("Location: dashboard.php");
         exit;
@@ -35,25 +49,19 @@ if (isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Aplikasi Keuangan</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2334d399' stroke-width='1.5'><path stroke-linecap='round' stroke-linejoin='round' d='M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /></svg>">
 
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2334d399' stroke-width='1.5'><path stroke-linecap='round' stroke-linejoin='round' d='M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /></svg>" type="image/svg+xml">
 
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-900">
 
-    <!-- Background dekoratif (gradient + bentuk blur, tanpa perlu file gambar) -->
+    <!-- Background dekoratif -->
     <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900"></div>
     <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-20"></div>
     <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-400 rounded-full mix-blend-screen filter blur-3xl opacity-10"></div>
     <div class="absolute top-1/3 right-1/4 w-72 h-72 bg-teal-400 rounded-full mix-blend-screen filter blur-3xl opacity-10"></div>
-
-    <!-- Kalau kamu punya file gambar sendiri (misal: bg.jpg), tinggal aktifkan baris di bawah ini
-         dan letakkan filenya di folder yang sama dengan index.php -->
-    <!--
-    <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('bg.jpg');"></div>
-    -->
 
     <!-- Kartu Login -->
     <div class="relative z-10 w-full max-w-md mx-4">
@@ -72,9 +80,16 @@ if (isset($_POST['login'])) {
             </div>
 
             <!-- Pesan Error -->
-            <?php if (isset($error)) { ?>
+            <?php if ($error !== "") { ?>
                 <div class="mb-5 px-4 py-3 rounded-lg bg-red-500/10 border border-red-400/30 text-red-300 text-sm text-center">
-                    <?php echo $error; ?>
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php } ?>
+
+            <!-- Pesan Registrasi Sukses -->
+            <?php if (isset($_GET['registrasi']) && $_GET['registrasi'] === 'sukses') { ?>
+                <div class="mb-5 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-sm text-center">
+                    Registrasi berhasil! Silakan login.
                 </div>
             <?php } ?>
 
@@ -124,7 +139,12 @@ if (isset($_POST['login'])) {
 
             </form>
 
-            <p class="text-center text-slate-400 text-xs mt-6">
+            <p class="text-center text-slate-300 text-sm mt-6">
+                Belum punya akun?
+                <a href="register.php" class="text-emerald-400 hover:text-emerald-300 font-medium transition">Daftar di sini</a>
+            </p>
+
+            <p class="text-center text-slate-400 text-xs mt-4">
                 &copy; <?php echo date("Y"); ?> Aplikasi Keuangan Admin
             </p>
 
