@@ -8,17 +8,19 @@ if (!isset($_SESSION['login'])) {
 
 include "conn.php";
 
+$user_id = $_SESSION['user_id'];
+
 $masuk = mysqli_fetch_assoc(
     mysqli_query(
         $conn,
-        "SELECT SUM(jumlah) total FROM pemasukan"
+        "SELECT SUM(jumlah) total FROM pemasukan WHERE user_id='$user_id'"
     )
 );
 
 $keluar = mysqli_fetch_assoc(
     mysqli_query(
         $conn,
-        "SELECT SUM(jumlah) total FROM pengeluaran"
+        "SELECT SUM(jumlah) total FROM pengeluaran WHERE user_id='$user_id'"
     )
 );
 
@@ -35,7 +37,8 @@ $saldo = $totalMasuk - $totalKeluar;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Aplikasi Keuangan</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2334d399' stroke-width='1.5'><path stroke-linecap='round' stroke-linejoin='round' d='M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /></svg>">
+    
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2334d399' stroke-width='1.5'><path stroke-linecap='round' stroke-linejoin='round' d='M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /></svg>" type="image/svg+xml">
 
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -154,6 +157,21 @@ $saldo = $totalMasuk - $totalKeluar;
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                 </svg>
             </a>
+
+            <?php if ($_SESSION['is_admin']) { ?>
+            <a href="users.php" class="group bg-white/10 backdrop-blur-xl border border-amber-400/30 rounded-2xl p-6 shadow-xl hover:bg-white/15 hover:border-amber-400/60 transition flex items-center justify-between sm:col-span-2">
+                <div>
+                    <h4 class="text-white font-semibold text-lg flex items-center gap-2">
+                        Kelola User
+                        <span class="text-[10px] uppercase tracking-wide bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full">Admin</span>
+                    </h4>
+                    <p class="text-slate-400 text-sm mt-1">Lihat seluruh user yang telah registrasi</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400 group-hover:text-amber-300 group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </a>
+            <?php } ?>
 
         </div>
 
